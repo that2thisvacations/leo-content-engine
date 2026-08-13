@@ -57,10 +57,10 @@ export default function DashboardPage() {
           <span className={styles.sunGlow} aria-hidden="true" />
           <Image
             className={styles.leoImage}
-            src="/leo/leo-hero.webp"
+            src="/leo/leo-hero.webp?v=4"
             alt="LEO, the lion cub travel explorer carrying his passport satchel"
-            width={256}
-            height={384}
+            width={160}
+            height={240}
             priority
             unoptimized
           />
