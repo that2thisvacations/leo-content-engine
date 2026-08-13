@@ -1,7 +1,11 @@
+import Image from "next/image";
+
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ProviderReadiness } from "@/components/dashboard/provider-readiness";
 import { dashboardAreas, dashboardMetrics } from "@/lib/dashboard";
+
+import styles from "./page.module.css";
 
 export default function DashboardPage() {
   return (
@@ -22,14 +26,30 @@ export default function DashboardPage() {
       </header>
 
       <section className="hero-panel" aria-labelledby="pipeline-heading">
-        <div className="hero-copy">
-          <span className="hero-kicker">LEO production pipeline</span>
-          <h2 id="pipeline-heading">The workspace is ready for its first adventure.</h2>
-          <p>
-            Core production areas are established. Provider adapters remain intentionally
-            disconnected until credentials and governance rules are approved.
-          </p>
+        <div className={styles.heroStage}>
+          <div className="hero-copy">
+            <span className="hero-kicker">LEO production pipeline</span>
+            <h2 id="pipeline-heading">The workspace is ready for its first adventure.</h2>
+            <p>
+              Core production areas are established. Provider adapters remain intentionally
+              disconnected until credentials and governance rules are approved.
+            </p>
+          </div>
+
+          <div className={styles.leoStage} aria-label="LEO, the trusted travel companion">
+            <span className={styles.tailGlow} aria-hidden="true" />
+            <Image
+              className={styles.leoImage}
+              src="/leo/leo-hero.png"
+              alt="LEO, the lion cub travel companion, wearing explorer gear and carrying his passport satchel"
+              width={512}
+              height={768}
+              priority
+              sizes="(max-width: 672px) 230px, (max-width: 1248px) 280px, 330px"
+            />
+          </div>
         </div>
+
         <div className="metric-grid" aria-label="Pipeline summary">
           {dashboardMetrics.map((metric) => (
             <div className="metric" key={metric.label}>
