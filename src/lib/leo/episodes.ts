@@ -1,6 +1,6 @@
 import "server-only";
 
-import { supabaseSelect } from "@/lib/supabase/rest";
+import { supabaseRpc } from "@/lib/supabase/rest";
 
 export type LeoEpisode = {
   id: string;
@@ -20,17 +20,11 @@ export type LeoEpisode = {
 };
 
 export async function listLeoEpisodes(limit = 25): Promise<LeoEpisode[]> {
-  return supabaseSelect<LeoEpisode>("leo_episodes", {
-    order: "episode_number.asc",
-    limit,
-  });
+  const episodes = await supabaseRpc<LeoEpisode[]>("leo_list_episodes");
+  return episodes.slice(0, Math.max(0, limit));
 }
 
 export async function getLeoEpisodeBySlug(slug: string): Promise<LeoEpisode | null> {
-  const episodes = await supabaseSelect<LeoEpisode>("leo_episodes", {
-    filters: { slug },
-    limit: 1,
-  });
-
+  const episodes = await supabaseRpc<LeoEpisode[]>("leo_get_episode", { p_slug: slug });
   return episodes[0] ?? null;
 }
