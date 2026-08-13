@@ -23,12 +23,35 @@ function buildUrl(baseUrl: string, table: string, options: QueryOptions = {}) {
   return url;
 }
 
-export async function supabaseSelect<T>(table: string, options: QueryOptions = {}): Promise<T[]> {
-  const environment = getServerEnvironment();
-  const supabase = environment.supabase;
+export async function supabaseRpc<T>(functionName: string, body: Record<string, unknown> = {}): Promise<T> {
+  const { supabase } = getServerEnvironment();
+  const url = new URL(`/rest/v1/rpc/${functionName}`, supabase.url);
 
-  if (!supabase) {
-    throw new Error("Supabase is not configured for the LEO Content Engine runtime.");
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      apikey: supabase.publishableKey,
+      Authorization: `Bearer ${supabase.publishableKey}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Supabase RPC failed (${response.status}): ${detail}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+export async function supabaseSelect<T>(table: string, options: QueryOptions = {}): Promise<T[]> {
+  const { supabase } = getServerEnvironment();
+
+  if (!supabase.serviceRoleKey) {
+    throw new Error("Service-role Supabase access is not configured for this operation.");
   }
 
   const response = await fetch(buildUrl(supabase.url, table, options), {
