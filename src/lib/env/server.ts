@@ -11,10 +11,17 @@ type OpenAIEnvironment = {
   model: string;
 };
 
+type YouTubeEnvironment = {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+};
+
 export type ServerEnvironment = {
   nodeEnv: "development" | "production" | "test";
   supabase: SupabaseEnvironment;
   openai: OpenAIEnvironment | null;
+  youtube: YouTubeEnvironment | null;
 };
 
 const DEFAULT_SUPABASE_URL = "https://onynvujitliqugkudkjp.supabase.co";
@@ -31,10 +38,21 @@ export function getServerEnvironment(): ServerEnvironment {
   const serviceRoleKey = readOptional("SUPABASE_SERVICE_ROLE_KEY");
   const openaiApiKey = readOptional("OPENAI_API_KEY");
   const openaiModel = readOptional("OPENAI_MODEL") ?? "gpt-5";
+  const youtubeClientId = readOptional("YOUTUBE_CLIENT_ID");
+  const youtubeClientSecret = readOptional("YOUTUBE_CLIENT_SECRET");
+  const youtubeRedirectUri = readOptional("YOUTUBE_REDIRECT_URI");
 
   return {
     nodeEnv: (process.env.NODE_ENV ?? "development") as ServerEnvironment["nodeEnv"],
     supabase: { url, publishableKey, serviceRoleKey },
     openai: openaiApiKey ? { apiKey: openaiApiKey, model: openaiModel } : null,
+    youtube:
+      youtubeClientId && youtubeClientSecret && youtubeRedirectUri
+        ? {
+            clientId: youtubeClientId,
+            clientSecret: youtubeClientSecret,
+            redirectUri: youtubeRedirectUri,
+          }
+        : null,
   };
 }
