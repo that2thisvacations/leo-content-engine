@@ -1,0 +1,32 @@
+name: Plan Japan Episode Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/plan-japan-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  plan-japan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Wait for production deployment
+        run: sleep 35
+
+      - name: Generate Japan episode plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          response=$(curl --fail-with-body --silent --show-error \
+            --retry 4 --retry-delay 8 --retry-all-errors \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            https://leo-content-engine.vercel.app/api/episodes/japan-001/plan)
+
+          printf '%s' "$response" > plan-response.json
+          echo "$response" | jq '{ok, episode, plan: {title: .plan.title, targetAge: .plan.targetAge, sceneCount: (.plan.scenes | length), parentBridge: .plan.parentBridge}}'
+          test "$(echo "$response" | jq -r '.ok')" = "true"
