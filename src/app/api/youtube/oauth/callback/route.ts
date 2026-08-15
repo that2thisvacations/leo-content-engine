@@ -46,6 +46,28 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "YouTube OAuth callback failed";
-    return NextResponse.json({ ok: false, error: message }, { status: 503 });
+
+    if (error instanceof Error && error.name === "YouTubeChannelOwnershipRequired") {
+      const response = NextResponse.json(
+        {
+          ok: false,
+          code: "YOUTUBE_CHANNEL_OWNER_REQUIRED",
+          error: message,
+          fix: [
+            "Use the Google account that OWNS the YouTube channel, not an account invited through YouTube Studio Permissions.",
+            "If the owner account manages multiple YouTube/Brand channels, make the target channel the default channel in YouTube before reconnecting.",
+            "Then reconnect. The LEO OAuth flow now forces Google to show the account chooser instead of silently reusing the previous identity.",
+          ],
+          reconnect: "https://leo-content-engine.vercel.app/api/youtube/oauth/connect",
+        },
+        { status: 409 },
+      );
+      response.cookies.delete(getStateCookieName());
+      return response;
+    }
+
+    const response = NextResponse.json({ ok: false, error: message }, { status: 503 });
+    response.cookies.delete(getStateCookieName());
+    return response;
   }
 }
