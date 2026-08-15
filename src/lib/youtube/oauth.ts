@@ -62,7 +62,10 @@ export function buildYouTubeAuthorizationUrl(state: string) {
   url.searchParams.set("scope", YOUTUBE_SCOPE);
   url.searchParams.set("access_type", "offline");
   url.searchParams.set("include_granted_scopes", "true");
-  url.searchParams.set("prompt", "consent");
+  // Force Google to show the account chooser every time. This avoids silently
+  // reusing the personal Google identity when the creator needs to authorize
+  // the Google account that actually owns the target YouTube channel.
+  url.searchParams.set("prompt", "select_account consent");
   url.searchParams.set("state", state);
   return url;
 }
@@ -111,7 +114,11 @@ export async function getAuthorizedYouTubeChannel(accessToken: string) {
   const channel = result.items?.[0];
 
   if (!channel?.id) {
-    throw new Error("No YouTube channel was found for the authorized Google account.");
+    const error = new Error(
+      "The authorized Google identity does not own a YouTube channel that the YouTube Data API can use. Reconnect with the Google account that owns the channel. YouTube Studio delegated/channel-permission access does not grant YouTube API access.",
+    );
+    error.name = "YouTubeChannelOwnershipRequired";
+    throw error;
   }
 
   return {
