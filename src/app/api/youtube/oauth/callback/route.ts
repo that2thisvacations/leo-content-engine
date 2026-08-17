@@ -32,13 +32,12 @@ export async function GET(request: NextRequest) {
       throw new Error("Google did not return a refresh token. Reconnect and approve access again.");
     }
 
-    const channel = await getAuthorizedYouTubeChannel(tokens.access_token);
+    await getAuthorizedYouTubeChannel(tokens.access_token);
     await saveYouTubeConnection({
+      accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       scope: tokens.scope,
       tokenType: tokens.token_type,
-      channelId: channel.id,
-      channelTitle: channel.title,
     });
 
     const response = NextResponse.redirect(new URL("/?youtube=connected", request.url));
