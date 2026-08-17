@@ -18,7 +18,7 @@ type TokenResponse = {
 type ChannelResponse = {
   items?: Array<{
     id?: string;
-    snippet?: { title?: string };
+    snippet?: { title?: string; customUrl?: string };
   }>;
 };
 
@@ -62,9 +62,6 @@ export function buildYouTubeAuthorizationUrl(state: string) {
   url.searchParams.set("scope", YOUTUBE_SCOPE);
   url.searchParams.set("access_type", "offline");
   url.searchParams.set("include_granted_scopes", "true");
-  // Force Google to show the account chooser every time. This avoids silently
-  // reusing the personal Google identity when the creator needs to authorize
-  // the Google account that actually owns the target YouTube channel.
   url.searchParams.set("prompt", "select_account consent");
   url.searchParams.set("state", state);
   return url;
@@ -124,38 +121,30 @@ export async function getAuthorizedYouTubeChannel(accessToken: string) {
   return {
     id: channel.id,
     title: channel.snippet?.title ?? "YouTube Channel",
+    handle: channel.snippet?.customUrl ?? null,
   };
 }
 
 export async function saveYouTubeConnection(input: {
+  accessToken: string;
   refreshToken: string;
   scope?: string;
   tokenType?: string;
-  channelId: string;
-  channelTitle: string;
 }) {
   const { supabase } = getServerEnvironment();
+  const endpoint = `${supabase.url}/functions/v1/leo-youtube-connect`;
 
-  if (!supabase.serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to store the YouTube refresh token securely.");
-  }
-
-  const response = await fetch(`${supabase.url}/rest/v1/leo_youtube_connections?on_conflict=provider`, {
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
-      apikey: supabase.serviceRoleKey,
-      Authorization: `Bearer ${supabase.serviceRoleKey}`,
+      apikey: supabase.publishableKey,
       "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates,return=minimal",
     },
     body: JSON.stringify({
-      provider: "youtube",
-      channel_id: input.channelId,
-      channel_title: input.channelTitle,
-      refresh_token: input.refreshToken,
+      accessToken: input.accessToken,
+      refreshToken: input.refreshToken,
       scope: input.scope ?? null,
-      token_type: input.tokenType ?? null,
-      connected_at: new Date().toISOString(),
+      tokenType: input.tokenType ?? null,
     }),
     cache: "no-store",
   });
