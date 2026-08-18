@@ -7,6 +7,11 @@ import {
   saveYouTubeConnection,
   verifyOAuthState,
 } from "@/lib/youtube/oauth";
+import {
+  createFounderSessionToken,
+  getFounderSessionCookieName,
+  getFounderSessionCookieOptions,
+} from "@/lib/security/founder-session";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,6 +47,11 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(new URL("/?youtube=connected", request.url));
     response.cookies.delete(getStateCookieName());
+    response.cookies.set(
+      getFounderSessionCookieName(),
+      createFounderSessionToken(),
+      getFounderSessionCookieOptions(),
+    );
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "YouTube OAuth callback failed";
