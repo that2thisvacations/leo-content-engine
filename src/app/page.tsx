@@ -13,13 +13,16 @@ const productionSteps = [
   ["05", "Publish", "Full YouTube episode, Shorts, metadata and parent page"],
 ] as const;
 
+const youtubeChannelUrl = "https://www.youtube.com/@LEODiscovers";
+const youtubeConnectUrl = "/api/youtube/oauth/connect";
+
 export default function DashboardPage() {
   return (
     <DashboardShell>
       <header className={styles.topbar}>
         <div>
           <p className="eyebrow">LEO YouTube Studio</p>
-          <h1>Build the channel. LEO explores the world.</h1>
+          <h1>Build @LEODiscovers. LEO explores the world.</h1>
           <p className="page-subtitle">
             The automated production studio behind LEO&apos;s travel-inspiration edutainment YouTube channel.
           </p>
@@ -32,7 +35,7 @@ export default function DashboardPage() {
 
       <section className={styles.channelHero} aria-labelledby="channel-heading">
         <div className={styles.heroCopy}>
-          <span className={styles.heroKicker}>YouTube-first animated travel channel</span>
+          <span className={styles.heroKicker}>@LEODiscovers · YouTube-first animated travel channel</span>
           <h2 id="channel-heading">Kids discover the world with LEO.</h2>
           <p className={styles.heroSubline}>Parents discover where to take them.</p>
           <p className={styles.heroBody}>
@@ -42,14 +45,14 @@ export default function DashboardPage() {
 
           <div className={styles.heroActions}>
             <button className={styles.primaryAction} type="button">Create Next Episode</button>
-            <button className={styles.secondaryAction} type="button">Open Channel Queue</button>
+            <a className={styles.secondaryAction} href={youtubeChannelUrl} target="_blank" rel="noreferrer">View @LEODiscovers</a>
           </div>
 
           <div className={styles.channelStats} aria-label="YouTube channel production summary">
             <div><strong>0</strong><span>Episodes</span></div>
             <div><strong>0</strong><span>Shorts</span></div>
             <div><strong>0</strong><span>Scheduled</span></div>
-            <div><strong>—</strong><span>YouTube connected</span></div>
+            <div><strong>LIVE</strong><span>Channel created</span></div>
           </div>
         </div>
 
@@ -81,9 +84,9 @@ export default function DashboardPage() {
 
         <article className={styles.studioCard}>
           <span className={styles.cardLabel}>YouTube Publishing</span>
-          <h2>Long-form + Shorts</h2>
-          <p>One approved adventure becomes the full episode, Shorts, title, description, thumbnail and chapters.</p>
-          <span className={styles.statusPill}>YouTube API not connected</span>
+          <h2>@LEODiscovers</h2>
+          <p>The channel now exists. Complete OAuth once more so LEO can securely publish approved long-form episodes and Shorts.</p>
+          <a className={styles.cardAction} href={youtubeConnectUrl}>Connect @LEODiscovers →</a>
         </article>
 
         <article className={styles.studioCard}>
