@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ProviderReadiness } from "@/components/dashboard/provider-readiness";
+import { JapanPlanControl } from "@/components/episodes/japan-plan-control";
 
 import styles from "./page.module.css";
 
@@ -44,7 +45,7 @@ export default function DashboardPage() {
           </p>
 
           <div className={styles.heroActions}>
-            <button className={styles.primaryAction} type="button">Create Next Episode</button>
+            <a className={styles.primaryAction} href="#japan-pilot">Create Next Episode</a>
             <a className={styles.secondaryAction} href={youtubeChannelUrl} target="_blank" rel="noreferrer">View @LEODiscovers</a>
           </div>
 
@@ -79,7 +80,7 @@ export default function DashboardPage() {
           <span className={styles.cardLabel}>Next Episode</span>
           <h2>Where should LEO go next?</h2>
           <p>Start with a destination. Japan remains the recommended pilot.</p>
-          <button className={styles.cardAction} type="button">Start Japan Pilot →</button>
+          <JapanPlanControl />
         </article>
 
         <article className={styles.studioCard}>
