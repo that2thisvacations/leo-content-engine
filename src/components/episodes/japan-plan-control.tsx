@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import styles from "./japan-plan-control.module.css";
 
@@ -64,6 +64,49 @@ export function JapanPlanControl() {
   const [planStatus, setPlanStatus] = useState("not_started");
   const [revisionNotes, setRevisionNotes] = useState("");
   const [showRevisionForm, setShowRevisionForm] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadPersistedPlan() {
+      try {
+        const response = await fetch("/api/episodes/japan-001/production", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+
+        const result = (await response.json()) as ProductionResponse;
+        const persistedPlan = result.plan?.plan ?? null;
+        if (!active || !persistedPlan) return;
+
+        const persistedScenes = result.scenes ?? persistedPlan.scenes ?? [];
+        const persistedStatus = result.plan?.status ?? "review_required";
+        setPlan(persistedPlan);
+        setScenes(persistedScenes);
+        setPlanStatus(persistedStatus);
+
+        if (persistedStatus === "approved") {
+          setStatus("approved");
+          setMessage("Japan plan approved. Storyboarding is unlocked; no media generation or publishing has started.");
+        } else if (persistedStatus === "changes_requested") {
+          setStatus("revision_requested");
+          setMessage("Revision notes are saved. The approval gate remains active.");
+        } else {
+          setStatus("ready");
+          setMessage(`Japan plan persisted with ${persistedScenes.length} scenes. Human approval is required before storyboarding.`);
+        }
+      } catch {
+        // Keep the control idle when no founder-authorized production state is available.
+      }
+    }
+
+    void loadPersistedPlan();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function startJapanPilot() {
     if (status === "planning") return;
