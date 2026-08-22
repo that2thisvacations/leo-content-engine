@@ -1,130 +1,31 @@
-.control {
-  display: grid;
-  gap: 1rem;
-}
-
-.action {
-  width: fit-content;
-  border: 0;
-  border-radius: 999px;
-  padding: 0.78rem 1.1rem;
-  background: linear-gradient(135deg, #f4c45e, #dca331);
-  color: #10223a;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 12px 28px rgba(220, 163, 49, 0.24);
-}
-
-.action:disabled {
-  cursor: wait;
-  opacity: 0.72;
-}
-
-.statusPanel {
-  display: grid;
-  gap: 0.75rem;
-  border: 1px solid rgba(91, 213, 255, 0.28);
-  border-radius: 18px;
-  padding: 1rem;
-  background: rgba(5, 21, 42, 0.88);
-  color: #eef8ff;
-}
-
-.statusPanel p {
-  margin: 0;
-  color: #c3d8e8;
-}
-
-.error {
-  border-color: rgba(255, 125, 125, 0.5);
-}
-
-.statusHeading {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.6rem;
-  color: #5bd5ff;
-  font-size: 0.74rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-}
-
-.statusHeading strong {
-  color: #f4c45e;
-  text-transform: uppercase;
-}
-
-.review {
-  display: grid;
-  gap: 1rem;
-  padding-top: 0.35rem;
-}
-
-.review h3,
-.review h4,
-.review p,
-.review ul,
-.review ol {
-  margin: 0;
-}
-
-.review h3 {
-  color: #ffffff;
-  font-size: 1.2rem;
-}
-
-.review h4 {
-  margin-bottom: 0.45rem;
-  color: #f4c45e;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.review ul {
-  padding-left: 1.25rem;
-  color: #dcecf7;
-}
-
-.scenes {
-  display: grid;
-  gap: 0.65rem;
-  padding-left: 1.25rem;
-}
-
-.scenes li {
-  padding-left: 0.25rem;
-}
-
-.scenes strong,
-.scenes span {
-  display: block;
-}
-
-.scenes span {
-  margin-top: 0.15rem;
-  color: #b8cedd;
-  font-size: 0.9rem;
-  line-height: 1.45;
-}
-
-.gate {
-  display: grid;
-  gap: 0.2rem;
-  border-left: 3px solid #f4c45e;
-  padding: 0.7rem 0.85rem;
-  background: rgba(244, 196, 94, 0.08);
-}
-
-.gate strong {
-  color: #f4c45e;
-  font-size: 0.76rem;
-  letter-spacing: 0.08em;
-}
-
-.gate span {
-  color: #dcecf7;
-  font-size: 0.88rem;
-}
+.control { display: grid; gap: 1rem; }
+.action { width: fit-content; border: 0; border-radius: 999px; padding: .78rem 1.1rem; background: linear-gradient(135deg,#f4c45e,#dca331); color: #10223a; font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 12px 28px rgba(220,163,49,.24); }
+.action:disabled { cursor: wait; opacity: .72; }
+.statusPanel { display: grid; gap: .75rem; border: 1px solid rgba(91,213,255,.28); border-radius: 18px; padding: 1rem; background: rgba(5,21,42,.88); color: #eef8ff; }
+.statusPanel p { margin: 0; color: #c3d8e8; }
+.error { border-color: rgba(255,125,125,.5); }
+.statusHeading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .6rem; color: #5bd5ff; font-size: .74rem; font-weight: 900; letter-spacing: .12em; }
+.statusHeading strong { color: #f4c45e; text-transform: uppercase; }
+.review { display: grid; gap: 1rem; padding-top: .35rem; }
+.review h3,.review h4,.review p,.review ul,.review ol { margin: 0; }
+.review h3 { color: #fff; font-size: 1.2rem; }
+.review h4 { margin-bottom: .45rem; color: #f4c45e; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+.review ul { padding-left: 1.25rem; color: #dcecf7; }
+.scenes { display: grid; gap: .65rem; padding-left: 1.25rem; }
+.scenes li { padding-left: .25rem; }
+.scenes strong,.scenes span { display: block; }
+.scenes span { margin-top: .15rem; color: #b8cedd; font-size: .9rem; line-height: 1.45; }
+.gate { display: grid; gap: .2rem; border-left: 3px solid #f4c45e; padding: .7rem .85rem; background: rgba(244,196,94,.08); }
+.gate strong { color: #f4c45e; font-size: .76rem; letter-spacing: .08em; }
+.gate span { color: #dcecf7; font-size: .88rem; }
+.reviewControls { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.reviewControls button,.revisionForm button { border-radius: 12px; padding: .75rem .85rem; font: inherit; font-weight: 800; cursor: pointer; }
+.approve { border: 0; background: #48c78e; color: #08251a; }
+.revise { border: 1px solid rgba(244,196,94,.65); background: transparent; color: #f4c45e; }
+.revisionForm { display: grid; gap: .55rem; padding: .85rem; border-radius: 14px; background: rgba(255,255,255,.06); }
+.revisionForm label { color: #fff; font-size: .82rem; font-weight: 800; }
+.revisionForm textarea { min-height: 110px; resize: vertical; border: 1px solid rgba(195,216,232,.35); border-radius: 10px; padding: .7rem; background: rgba(2,13,29,.72); color: #fff; font: inherit; }
+.revisionForm div { display: flex; flex-wrap: wrap; gap: .55rem; }
+.submitRevision { border: 0; background: #f4c45e; color: #10223a; }
+.cancel { border: 1px solid rgba(195,216,232,.35); background: transparent; color: #dcecf7; }
+@media (max-width: 640px) { .reviewControls { grid-template-columns: 1fr; } }
