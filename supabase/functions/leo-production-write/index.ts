@@ -134,6 +134,30 @@ Deno.serve(async (req) => {
       return json({ ok: true, action, episode: { id: episode.id, slug: episode.slug }, sceneCount: scenes.length });
     }
 
+    if (action === "request_plan_revision") {
+      const notes = typeof payload?.notes === "string" ? payload.notes.trim().slice(0, 4000) : "";
+      if (notes.length < 5) return json({ ok: false, error: "Revision notes are required" }, 400);
+      const now = new Date().toISOString();
+
+      await rest(`leo_episode_plans?episode_id=eq.${episodeId}`, {
+        method: "PATCH",
+        headers: { prefer: "return=minimal" },
+        body: JSON.stringify({ status: "changes_requested", reviewed_at: now, approved_at: null, reviewer_notes: notes }),
+      });
+      await rest(`leo_reviews?episode_id=eq.${episodeId}&review_type=eq.producer`, {
+        method: "PATCH",
+        headers: { prefer: "return=minimal" },
+        body: JSON.stringify({ status: "changes_requested", notes, reviewed_at: now }),
+      });
+      await rest(`leo_episodes?id=eq.${episodeId}`, {
+        method: "PATCH",
+        headers: { prefer: "return=minimal" },
+        body: JSON.stringify({ status: "plan_revision_requested" }),
+      });
+
+      return json({ ok: true, action, episode: { id: episode.id, slug: episode.slug }, status: "changes_requested" });
+    }
+
     if (action === "approve_plan") {
       const notes = typeof payload?.notes === "string" ? payload.notes.slice(0, 4000) : null;
       const now = new Date().toISOString();
