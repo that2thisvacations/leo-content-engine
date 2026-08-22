@@ -1,5 +1,6 @@
 import "server-only";
 
+import { callLeoProductionFunction } from "@/lib/leo/production-write";
 import { supabaseRpc } from "@/lib/supabase/rest";
 
 export type LeoEpisode = {
@@ -27,4 +28,12 @@ export async function listLeoEpisodes(limit = 25): Promise<LeoEpisode[]> {
 export async function getLeoEpisodeBySlug(slug: string): Promise<LeoEpisode | null> {
   const episodes = await supabaseRpc<LeoEpisode[]>("leo_get_episode", { p_slug: slug });
   return episodes[0] ?? null;
+}
+
+export async function getFounderEpisodeBySlug(slug: string): Promise<LeoEpisode | null> {
+  const result = await callLeoProductionFunction<{ ok: true; episode: LeoEpisode }>({
+    action: "resolve_episode",
+    slug,
+  });
+  return result.episode ?? null;
 }

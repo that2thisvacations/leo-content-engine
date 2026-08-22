@@ -54,6 +54,21 @@ Deno.serve(async (req) => {
 
     const payload = JSON.parse(payloadRaw);
     const action = payload?.action;
+
+    if (action === "resolve_episode") {
+      const slug = typeof payload?.slug === "string" ? payload.slug.trim() : "";
+      if (!slug || slug.length > 120 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+        return json({ ok: false, error: "Invalid episode slug" }, 400);
+      }
+
+      const rows = await rest(
+        `leo_episodes?slug=eq.${encodeURIComponent(slug)}&select=id,destination_id,episode_number,slug,title,working_title,status,learning_pillars,synopsis,youtube_title,youtube_video_id,published_at,created_at,updated_at&limit=1`,
+      );
+      const resolvedEpisode = Array.isArray(rows) ? rows[0] : null;
+      if (!resolvedEpisode) return json({ ok: false, error: "Episode not found" }, 404);
+      return json({ ok: true, action, episode: resolvedEpisode });
+    }
+
     const episodeId = payload?.episodeId;
     if (!isUuid(episodeId)) return json({ ok: false, error: "Invalid episode id" }, 400);
 

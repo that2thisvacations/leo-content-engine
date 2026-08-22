@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getLeoEpisodeBySlug } from "@/lib/leo/episodes";
+import { getFounderEpisodeBySlug } from "@/lib/leo/episodes";
 import { callLeoProductionFunction } from "@/lib/leo/production-write";
 import { hasFounderSession } from "@/lib/security/founder-session";
 
@@ -14,7 +14,7 @@ export async function GET(request: Request, context: RouteContext) {
   }
 
   const { slug } = await context.params;
-  const episode = await getLeoEpisodeBySlug(slug);
+  const episode = await getFounderEpisodeBySlug(slug);
   if (!episode) {
     return NextResponse.json({ ok: false, error: `Episode not found: ${slug}` }, { status: 404 });
   }
