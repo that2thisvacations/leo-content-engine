@@ -38,6 +38,7 @@ type PlanResponse = {
 type ProductionResponse = {
   ok?: boolean;
   error?: string;
+  episode?: { status?: string } | null;
   plan?: { status?: string; plan?: EpisodePlan } | null;
   scenes?: Scene[];
 };
@@ -57,7 +58,7 @@ function messageFrom(value: unknown, fallback: string) {
 }
 
 export function JapanPlanControl() {
-  const [status, setStatus] = useState<"idle" | "planning" | "ready" | "approving" | "approved" | "revising" | "revision_requested" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "planning" | "ready" | "approving" | "approved" | "revising" | "revision_requested" | "storyboard_building" | "storyboard_ready" | "error">("idle");
   const [message, setMessage] = useState("");
   const [plan, setPlan] = useState<EpisodePlan | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
@@ -87,9 +88,13 @@ export function JapanPlanControl() {
         setScenes(persistedScenes);
         setPlanStatus(persistedStatus);
 
-        if (persistedStatus === "approved") {
+        if (persistedStatus === "approved" && result.episode?.status === "storyboard_review_required") {
+          setPlanStatus("storyboard_review_required");
+          setStatus("storyboard_ready");
+          setMessage(`Storyboard package ready with ${persistedScenes.length} scenes. Media generation, assembly, and YouTube upload remain stopped.`);
+        } else if (persistedStatus === "approved") {
           setStatus("approved");
-          setMessage("Japan plan approved. Storyboarding is unlocked; no media generation or publishing has started.");
+          setMessage("Japan plan approved. Continuing into the storyboard stage…");
         } else if (persistedStatus === "changes_requested") {
           setStatus("revision_requested");
           setMessage("Revision notes are saved. The approval gate remains active.");
@@ -208,8 +213,36 @@ export function JapanPlanControl() {
     }
   }
 
+  async function buildStoryboard() {
+    setStatus("storyboard_building");
+    setMessage("Building the persisted scene prompts into LEO’s storyboard package…");
+    try {
+      const response = await fetch("/api/episodes/japan-001/storyboard", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+      });
+      const result = (await response.json()) as ReviewActionResponse & { sceneCount?: number };
+      if (!response.ok || result.ok === false) {
+        throw new Error(messageFrom(result, `Storyboard handoff failed (${response.status}).`));
+      }
+      setPlanStatus(result.nextStage ?? result.status ?? "storyboard_review_required");
+      setStatus("storyboard_ready");
+      setMessage(`Storyboard package ready with ${result.sceneCount ?? scenes.length} scenes. Media generation, assembly, and YouTube upload remain stopped.`);
+    } catch (error) {
+      setStatus("approved");
+      setMessage(error instanceof Error ? error.message : "Unable to build the storyboard.");
+    }
+  }
+
+  useEffect(() => {
+    if (status === "approved") void buildStoryboard();
+    // Storyboard handoff runs once when persisted founder approval is observed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
   const learningGoals = plan?.learningGoals ?? plan?.learning_goals ?? [];
-  const showPlan = plan && ["ready", "approving", "approved", "revising", "revision_requested"].includes(status);
+  const showPlan = plan && ["ready", "approving", "approved", "revising", "revision_requested", "storyboard_building", "storyboard_ready"].includes(status);
   const canReview = status === "ready" || planStatus === "review_required";
 
   return (
@@ -221,7 +254,7 @@ export function JapanPlanControl() {
       {status !== "idle" ? (
         <section className={`${styles.statusPanel} ${status === "error" ? styles.error : ""}`} aria-live="polite">
           <div className={styles.statusHeading}>
-            <span>{status === "approved" ? "PLAN APPROVED" : status === "revision_requested" ? "REVISIONS REQUESTED" : status === "error" ? "ACTION REQUIRED" : status === "planning" ? "PRODUCTION PLANNING" : "PLAN READY FOR REVIEW"}</span>
+            <span>{status === "storyboard_ready" ? "STORYBOARD READY" : status === "storyboard_building" ? "BUILDING STORYBOARD" : status === "approved" ? "PLAN APPROVED" : status === "revision_requested" ? "REVISIONS REQUESTED" : status === "error" ? "ACTION REQUIRED" : status === "planning" ? "PRODUCTION PLANNING" : "PLAN READY FOR REVIEW"}</span>
             {showPlan ? <strong>{planStatus.replaceAll("_", " ")}</strong> : null}
           </div>
           <p>{message}</p>
@@ -253,7 +286,7 @@ export function JapanPlanControl() {
                 </ol>
               </div>
               <div className={styles.gate}>
-                <strong>{status === "approved" ? "PLAN APPROVED — STORYBOARDING UNLOCKED" : "HUMAN APPROVAL GATE ACTIVE"}</strong>
+                <strong>{status === "storyboard_ready" ? "STORYBOARD PACKAGE READY" : status === "storyboard_building" || status === "approved" ? "PLAN APPROVED — STORYBOARDING IN PROGRESS" : "HUMAN APPROVAL GATE ACTIVE"}</strong>
                 <span>No media generation, assembly, or YouTube upload has started.</span>
               </div>
 
