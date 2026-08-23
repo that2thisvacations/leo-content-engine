@@ -210,7 +210,7 @@ export function JapanPlanControl() {
 
   const learningGoals = plan?.learningGoals ?? plan?.learning_goals ?? [];
   const showPlan = plan && ["ready", "approving", "approved", "revising", "revision_requested"].includes(status);
-  const canReview = status === "ready";
+  const canReview = status === "ready" || planStatus === "review_required";
 
   return (
     <div className={styles.control} id="japan-pilot">
@@ -230,18 +230,6 @@ export function JapanPlanControl() {
             <div className={styles.review}>
               <h3>{plan.title ?? "LEO’s First Big Adventure: Japan"}</h3>
               {plan.logline ? <p>{plan.logline}</p> : null}
-              {learningGoals.length ? <div><h4>Learning goals</h4><ul>{learningGoals.map((goal) => <li key={goal}>{goal}</li>)}</ul></div> : null}
-              <div>
-                <h4>Persisted scenes</h4>
-                <ol className={styles.scenes}>
-                  {scenes.map((scene, index) => <li key={scene.number ?? scene.scene_number ?? index}><strong>{scene.title ?? `Scene ${index + 1}`}</strong><span>{scene.goal ?? scene.purpose ?? scene.dialogue ?? scene.narration ?? "Scene plan persisted."}</span></li>)}
-                </ol>
-              </div>
-              <div className={styles.gate}>
-                <strong>{status === "approved" ? "PLAN APPROVED — STORYBOARDING UNLOCKED" : "HUMAN APPROVAL GATE ACTIVE"}</strong>
-                <span>No media generation, assembly, or YouTube upload has started.</span>
-              </div>
-
               {canReview ? (
                 <div className={styles.reviewControls}>
                   <button className={styles.approve} type="button" onClick={approvePlan}>Approve Japan Plan</button>
@@ -256,6 +244,19 @@ export function JapanPlanControl() {
                   <div><button className={styles.submitRevision} type="button" onClick={requestRevisions}>Submit Revision Request</button><button className={styles.cancel} type="button" onClick={() => setShowRevisionForm(false)}>Cancel</button></div>
                 </div>
               ) : null}
+
+              {learningGoals.length ? <div><h4>Learning goals</h4><ul>{learningGoals.map((goal) => <li key={goal}>{goal}</li>)}</ul></div> : null}
+              <div>
+                <h4>Persisted scenes</h4>
+                <ol className={styles.scenes}>
+                  {scenes.map((scene, index) => <li key={scene.number ?? scene.scene_number ?? index}><strong>{scene.title ?? `Scene ${index + 1}`}</strong><span>{scene.goal ?? scene.purpose ?? scene.dialogue ?? scene.narration ?? "Scene plan persisted."}</span></li>)}
+                </ol>
+              </div>
+              <div className={styles.gate}>
+                <strong>{status === "approved" ? "PLAN APPROVED — STORYBOARDING UNLOCKED" : "HUMAN APPROVAL GATE ACTIVE"}</strong>
+                <span>No media generation, assembly, or YouTube upload has started.</span>
+              </div>
+
             </div>
           ) : null}
         </section>
