@@ -181,6 +181,47 @@ Deno.serve(async (req) => {
       return json({ ok: true, action, episode: { id: episode.id, slug: episode.slug }, status: "storyboard_ready" });
     }
 
+    if (action === "build_storyboard") {
+      const plans = await rest(`leo_episode_plans?episode_id=eq.${episodeId}&select=status&limit=1`);
+      const approvedPlan = Array.isArray(plans) ? plans[0] : null;
+      if (!approvedPlan || approvedPlan.status !== "approved") {
+        return json({ ok: false, error: "Human-approved episode plan required" }, 409);
+      }
+
+      const scenes = await rest(`leo_scenes?episode_id=eq.${episodeId}&select=id,scene_number,title,purpose,narration,dialogue,visual_prompt,duration_seconds,status&order=scene_number.asc`);
+      if (!Array.isArray(scenes) || scenes.length < 6) {
+        return json({ ok: false, error: "Persisted scene prompts are required" }, 409);
+      }
+
+      await rest(`leo_scenes?episode_id=eq.${episodeId}`, {
+        method: "PATCH",
+        headers: { prefer: "return=minimal" },
+        body: JSON.stringify({ status: "storyboard_ready" }),
+      });
+      await rest(`leo_episodes?id=eq.${episodeId}`, {
+        method: "PATCH",
+        headers: { prefer: "return=minimal" },
+        body: JSON.stringify({ status: "storyboard_review_required" }),
+      });
+
+      return json({
+        ok: true,
+        action,
+        episode: { id: episode.id, slug: episode.slug },
+        status: "storyboard_review_required",
+        sceneCount: scenes.length,
+        storyboard: scenes.map((scene: any) => ({
+          scene_number: scene.scene_number,
+          title: scene.title,
+          purpose: scene.purpose,
+          narration: scene.narration,
+          dialogue: scene.dialogue,
+          visual_prompt: scene.visual_prompt,
+          duration_seconds: scene.duration_seconds,
+        })),
+      });
+    }
+
     if (action === "get_production") {
       const plans = await rest(`leo_episode_plans?episode_id=eq.${episodeId}&select=*`);
       const scenes = await rest(`leo_scenes?episode_id=eq.${episodeId}&select=*&order=scene_number.asc`);
