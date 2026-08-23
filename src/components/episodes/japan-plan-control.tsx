@@ -38,6 +38,7 @@ type PlanResponse = {
 type ProductionResponse = {
   ok?: boolean;
   error?: string;
+  episode?: { status?: string } | null;
   plan?: { status?: string; plan?: EpisodePlan } | null;
   scenes?: Scene[];
 };
@@ -87,9 +88,13 @@ export function JapanPlanControl() {
         setScenes(persistedScenes);
         setPlanStatus(persistedStatus);
 
-        if (persistedStatus === "approved") {
+        if (persistedStatus === "approved" && result.episode?.status === "storyboard_review_required") {
+          setPlanStatus("storyboard_review_required");
+          setStatus("storyboard_ready");
+          setMessage(`Storyboard package ready with ${persistedScenes.length} scenes. Media generation, assembly, and YouTube upload remain stopped.`);
+        } else if (persistedStatus === "approved") {
           setStatus("approved");
-          setMessage("Japan plan approved. Storyboarding is unlocked; no media generation or publishing has started.");
+          setMessage("Japan plan approved. Continuing into the storyboard stage…");
         } else if (persistedStatus === "changes_requested") {
           setStatus("revision_requested");
           setMessage("Revision notes are saved. The approval gate remains active.");
