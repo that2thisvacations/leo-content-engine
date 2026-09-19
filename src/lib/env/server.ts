@@ -11,7 +11,7 @@ type OpenAIEnvironment = {
   model: string;
 };
 
-type YouTubeEnvironment = {
+type RunPodEnvironment = {\n  apiKey: string;\n  endpointId: string;\n};\n\ntype YouTubeEnvironment = {
   clientId: string;
   clientSecret: string;
   redirectUri: string;
@@ -21,7 +21,7 @@ export type ServerEnvironment = {
   nodeEnv: "development" | "production" | "test";
   supabase: SupabaseEnvironment;
   openai: OpenAIEnvironment | null;
-  youtube: YouTubeEnvironment | null;
+  youtube: YouTubeEnvironment | null;\n  runpod: RunPodEnvironment | null;
 };
 
 const DEFAULT_SUPABASE_URL = "https://onynvujitliqugkudkjp.supabase.co";
@@ -40,7 +40,7 @@ export function getServerEnvironment(): ServerEnvironment {
   const openaiModel = readOptional("OPENAI_MODEL") ?? "gpt-5";
   const youtubeClientId = readOptional("YOUTUBE_CLIENT_ID");
   const youtubeClientSecret = readOptional("YOUTUBE_CLIENT_SECRET");
-  const youtubeRedirectUri = readOptional("YOUTUBE_REDIRECT_URI");
+  const youtubeRedirectUri = readOptional("YOUTUBE_REDIRECT_URI");\n  const runpodApiKey = readOptional("RUNPOD_API_KEY");\n  const runpodEndpointId = readOptional("RUNPOD_ENDPOINT_ID");
 
   return {
     nodeEnv: (process.env.NODE_ENV ?? "development") as ServerEnvironment["nodeEnv"],
