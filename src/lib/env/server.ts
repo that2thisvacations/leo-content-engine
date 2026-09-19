@@ -11,7 +11,12 @@ type OpenAIEnvironment = {
   model: string;
 };
 
-type RunPodEnvironment = {\n  apiKey: string;\n  endpointId: string;\n};\n\ntype YouTubeEnvironment = {
+type RunPodEnvironment = {
+  apiKey: string;
+  endpointId: string;
+};
+
+type YouTubeEnvironment = {
   clientId: string;
   clientSecret: string;
   redirectUri: string;
@@ -21,7 +26,8 @@ export type ServerEnvironment = {
   nodeEnv: "development" | "production" | "test";
   supabase: SupabaseEnvironment;
   openai: OpenAIEnvironment | null;
-  youtube: YouTubeEnvironment | null;\n  runpod: RunPodEnvironment | null;
+  youtube: YouTubeEnvironment | null;
+  runpod: RunPodEnvironment | null;
 };
 
 const DEFAULT_SUPABASE_URL = "https://onynvujitliqugkudkjp.supabase.co";
@@ -40,19 +46,18 @@ export function getServerEnvironment(): ServerEnvironment {
   const openaiModel = readOptional("OPENAI_MODEL") ?? "gpt-5";
   const youtubeClientId = readOptional("YOUTUBE_CLIENT_ID");
   const youtubeClientSecret = readOptional("YOUTUBE_CLIENT_SECRET");
-  const youtubeRedirectUri = readOptional("YOUTUBE_REDIRECT_URI");\n  const runpodApiKey = readOptional("RUNPOD_API_KEY");\n  const runpodEndpointId = readOptional("RUNPOD_ENDPOINT_ID");
+  const youtubeRedirectUri = readOptional("YOUTUBE_REDIRECT_URI");
+  const runpodApiKey = readOptional("RUNPOD_API_KEY");
+  const runpodEndpointId = readOptional("RUNPOD_ENDPOINT_ID");
 
   return {
     nodeEnv: (process.env.NODE_ENV ?? "development") as ServerEnvironment["nodeEnv"],
     supabase: { url, publishableKey, serviceRoleKey },
     openai: openaiApiKey ? { apiKey: openaiApiKey, model: openaiModel } : null,
+    runpod: runpodApiKey && runpodEndpointId ? { apiKey: runpodApiKey, endpointId: runpodEndpointId } : null,
     youtube:
       youtubeClientId && youtubeClientSecret && youtubeRedirectUri
-        ? {
-            clientId: youtubeClientId,
-            clientSecret: youtubeClientSecret,
-            redirectUri: youtubeRedirectUri,
-          }
+        ? { clientId: youtubeClientId, clientSecret: youtubeClientSecret, redirectUri: youtubeRedirectUri }
         : null,
   };
 }
