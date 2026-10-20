@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { createHmac } from "node:crypto";
 import type { ProviderHealth, WorkflowProvider } from "@/lib/providers/contracts";
 
 export type LeoEpisodeJob = {
@@ -34,7 +34,7 @@ export class LeoN8nWorkflowProvider implements WorkflowProvider {
     const configured = Boolean(process.env.LEO_N8N_WEBHOOK_URL && process.env.LEO_N8N_SIGNING_SECRET);
     return {configured,status:configured?"available":"not-configured"};
   }
-  async enqueue(job: {type:string;payload:unknown}): Promise<{jobId:string}> {
+  async enqueue(job: {type:string;payload:unknown;jobId?:string}): Promise<{jobId:string}> {
     if (job.type !== "leo-episode") throw new Error("Unsupported workflow type");
     const payload = validateLeoEpisodeJob(job.payload);
     const endpoint = process.env.LEO_N8N_WEBHOOK_URL;
@@ -43,9 +43,9 @@ export class LeoN8nWorkflowProvider implements WorkflowProvider {
     if (secret.length < 32) throw new Error("Leo n8n signing secret must be at least 32 characters");
     const url = new URL(endpoint);
     if (url.protocol !== "https:" || url.username || url.password || !url.hostname || url.hostname === "localhost" || /^(127\\.|10\\.|192\\.168\\.|169\\.254\\.)/.test(url.hostname)) throw new Error("Leo n8n webhook must use HTTPS without embedded credentials");
-    const jobId = randomUUID();
-    // This UUID must correspond to a durably reserved leo_production_jobs row
-    // before the webhook is sent. Do not call enqueue directly from a public route.
+    if (!job.jobId) throw new Error("A pre-reserved Leo production job UUID is required");
+    const jobId = job.jobId;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId)) throw new Error("Invalid reserved production job UUID");
     const body = JSON.stringify({version:1,jobId,type:"leo-episode",payload,creativeDirection:{
       character:"Leo the Lion",referencePolicy:"canonical-reference-required",
       style:"cinematic lifelike lion cub; physically convincing fur, anatomy, expressions and environmental lighting",
