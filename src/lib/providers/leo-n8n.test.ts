@@ -6,7 +6,7 @@ import { verifyLeoWebhook } from "./leo-n8n-signature";
 
 const secret = "a".repeat(48);
 const payload = {
-  episodeId: "leo-japan-001",
+  episodeId: "7c3e18b2-34b0-4a7a-a930-a20414d82c09",
   topic: "Leo explores Kyoto",
   durationSeconds: 60,
   aspectRatio: "9:16",
