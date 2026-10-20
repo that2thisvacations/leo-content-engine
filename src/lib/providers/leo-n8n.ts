@@ -18,7 +18,7 @@ export function validateLeoEpisodeJob(input: unknown): LeoEpisodeJob {
   const topic = typeof v.topic === "string" ? v.topic.trim() : "";
   const url = typeof v.canonicalCharacterReferenceUrl === "string" ? v.canonicalCharacterReferenceUrl : "";
   const durationSeconds = Number(v.durationSeconds);
-  if (!/^[a-zA-Z0-9_-]{3,100}$/.test(episodeId)) throw new Error("Invalid episode ID");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(episodeId)) throw new Error("Episode ID must match the existing Leo database UUID");
   if (!topic || topic.length > 1000) throw new Error("Episode topic must be 1–1000 characters");
   if (!Number.isInteger(durationSeconds) || durationSeconds < 10 || durationSeconds > 900) throw new Error("Duration must be 10–900 seconds");
   if (!/^https:\/\//i.test(url)) throw new Error("A secure canonical Leo reference URL is required");
@@ -44,6 +44,8 @@ export class LeoN8nWorkflowProvider implements WorkflowProvider {
     const url = new URL(endpoint);
     if (url.protocol !== "https:" || url.username || url.password || !url.hostname || url.hostname === "localhost" || /^(127\\.|10\\.|192\\.168\\.|169\\.254\\.)/.test(url.hostname)) throw new Error("Leo n8n webhook must use HTTPS without embedded credentials");
     const jobId = randomUUID();
+    // This UUID must correspond to a durably reserved leo_production_jobs row
+    // before the webhook is sent. Do not call enqueue directly from a public route.
     const body = JSON.stringify({version:1,jobId,type:"leo-episode",payload,creativeDirection:{
       character:"Leo the Lion",referencePolicy:"canonical-reference-required",
       style:"cinematic lifelike lion cub; physically convincing fur, anatomy, expressions and environmental lighting",
