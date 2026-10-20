@@ -40,8 +40,9 @@ export class LeoN8nWorkflowProvider implements WorkflowProvider {
     const endpoint = process.env.LEO_N8N_WEBHOOK_URL;
     const secret = process.env.LEO_N8N_SIGNING_SECRET;
     if (!endpoint || !secret) throw new Error("Leo n8n integration is not configured");
+    if (secret.length < 32) throw new Error("Leo n8n signing secret must be at least 32 characters");
     const url = new URL(endpoint);
-    if (url.protocol !== "https:" || url.username || url.password) throw new Error("Leo n8n webhook must use HTTPS without embedded credentials");
+    if (url.protocol !== "https:" || url.username || url.password || !url.hostname || url.hostname === "localhost" || /^(127\\.|10\\.|192\\.168\\.|169\\.254\\.)/.test(url.hostname)) throw new Error("Leo n8n webhook must use HTTPS without embedded credentials");
     const jobId = randomUUID();
     const body = JSON.stringify({version:1,jobId,type:"leo-episode",payload,creativeDirection:{
       character:"Leo the Lion",referencePolicy:"canonical-reference-required",
